@@ -126,22 +126,22 @@ export function TypingGame({ level }: TypingGameProps) {
       const newIndex = currentIndex + 1
       const wordsPerRow = 12
       
-      // When completing a row, remove it and add new words at the end
+      // When completing the first row (12 words), shift rows up
       if (newIndex >= wordsPerRow) {
         setWords((prev) => {
-          // Remove the completed row
+          // Remove the completed first row
           const remainingWords = prev.slice(wordsPerRow)
-          // Mark the first word of remaining as current
+          // Mark the first word of the new first row as current
           if (remainingWords.length > 0) {
             remainingWords[0] = { ...remainingWords[0], status: "current" }
           }
-          // Generate new words to add at the end
-          const newWords = generateWordSet(level, wordsPerRow).map((word) => ({
+          // Generate a new row to add at the end
+          const newRowWords = generateWordSet(level, wordsPerRow).map((word) => ({
             word,
             status: "pending" as WordStatus,
             userInput: "",
           }))
-          return [...remainingWords, ...newWords]
+          return [...remainingWords, ...newRowWords]
         })
         setCurrentIndex(0)
       } else {
@@ -264,10 +264,10 @@ export function TypingGame({ level }: TypingGameProps) {
           </div>
         </div>
 
-        {/* Words Display */}
-        <div className="relative overflow-hidden bg-card/50 rounded-lg p-4 border border-border" style={{ minHeight: "160px" }}>
+        {/* Words Display - 2 rows */}
+        <div className="relative overflow-hidden bg-card/50 rounded-lg p-4 border border-border">
           <div className="flex flex-wrap gap-x-4 gap-y-3 justify-between text-2xl leading-relaxed font-sans">
-            {words.slice(0, 36).map((wordState, index) => (
+            {words.slice(0, 24).map((wordState, index) => (
               <span
                 key={`${wordState.word.hanzi}-${index}`}
                 className={`text-2xl px-2 py-1 rounded transition-all ${
