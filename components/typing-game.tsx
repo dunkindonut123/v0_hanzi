@@ -128,10 +128,6 @@ export function TypingGame({ level }: TypingGameProps) {
     }
   }
 
-  const handleContainerClick = () => {
-    inputRef.current?.focus()
-  }
-
   const calculateWPM = () => {
     const timeElapsed = (GAME_DURATION - timeLeft) / 60 // Convert to minutes
     if (timeElapsed === 0) return 0
@@ -219,8 +215,7 @@ export function TypingGame({ level }: TypingGameProps) {
 
   return (
     <div 
-      className="min-h-screen bg-background flex flex-col items-center justify-center p-4 cursor-text"
-      onClick={handleContainerClick}
+      className="min-h-screen bg-background flex flex-col items-center justify-center p-4"
       ref={containerRef}
     >
       <div className="w-full max-w-4xl space-y-8">
@@ -247,17 +242,17 @@ export function TypingGame({ level }: TypingGameProps) {
 
         {/* Words Display */}
         <div className="relative overflow-hidden" style={{ height: "180px" }}>
-          <div className="flex flex-wrap gap-x-4 gap-y-6 justify-center text-2xl leading-relaxed font-sans">
-            {words.slice(0, 35).map((wordState, index) => (
+          <div className="flex flex-wrap gap-x-3 gap-y-4 justify-center text-2xl leading-relaxed font-sans">
+            {words.slice(0, 25).map((wordState, index) => (
               <span
                 key={index}
-                className={`text-3xl transition-colors ${
+                className={`text-3xl px-2 py-1 rounded transition-all ${
                   wordState.status === "current"
-                    ? "text-current"
+                    ? "bg-primary/20 text-primary border-2 border-primary"
                     : wordState.status === "correct"
-                    ? "text-correct"
+                    ? "bg-green-500/20 text-green-500"
                     : wordState.status === "incorrect"
-                    ? "text-incorrect"
+                    ? "bg-red-500/20 text-red-500"
                     : "text-foreground"
                 }`}
               >
@@ -267,20 +262,23 @@ export function TypingGame({ level }: TypingGameProps) {
           </div>
         </div>
 
-        {/* Hidden Input */}
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="absolute opacity-0 pointer-events-none"
-          autoFocus
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-        />
+        {/* Visible Input */}
+        <div className="flex justify-center">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            className="w-full max-w-md px-4 py-3 text-xl text-center bg-card border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
+            placeholder="Type here..."
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+          />
+        </div>
 
         {/* Instructions */}
         {gameState === "idle" && (
