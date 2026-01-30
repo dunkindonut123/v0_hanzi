@@ -123,7 +123,31 @@ export function TypingGame({ level }: TypingGameProps) {
           : prev.correctKeystrokes,
       }))
 
-      setCurrentIndex((prev) => prev + 1)
+      const newIndex = currentIndex + 1
+      const wordsPerRow = 12
+      
+      // When completing a row, remove it and add new words at the end
+      if (newIndex >= wordsPerRow) {
+        setWords((prev) => {
+          // Remove the completed row
+          const remainingWords = prev.slice(wordsPerRow)
+          // Mark the first word of remaining as current
+          if (remainingWords.length > 0) {
+            remainingWords[0] = { ...remainingWords[0], status: "current" }
+          }
+          // Generate new words to add at the end
+          const newWords = generateWordSet(level, wordsPerRow).map((word) => ({
+            word,
+            status: "pending" as WordStatus,
+            userInput: "",
+          }))
+          return [...remainingWords, ...newWords]
+        })
+        setCurrentIndex(0)
+      } else {
+        setCurrentIndex(newIndex)
+      }
+      
       setInput("")
     }
   }
@@ -218,7 +242,7 @@ export function TypingGame({ level }: TypingGameProps) {
       className="min-h-screen bg-background flex flex-col items-center justify-center p-4"
       ref={containerRef}
     >
-      <div className="w-full max-w-4xl space-y-8">
+      <div className="w-full max-w-5xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-center gap-4">
           <Link 
@@ -241,18 +265,18 @@ export function TypingGame({ level }: TypingGameProps) {
         </div>
 
         {/* Words Display */}
-        <div className="relative overflow-hidden" style={{ height: "180px" }}>
-          <div className="flex flex-wrap gap-x-3 gap-y-4 justify-center text-2xl leading-relaxed font-sans">
-            {words.slice(0, 25).map((wordState, index) => (
+        <div className="relative overflow-hidden bg-card/50 rounded-lg p-4 border border-border" style={{ minHeight: "160px" }}>
+          <div className="flex flex-wrap gap-x-4 gap-y-3 justify-between text-2xl leading-relaxed font-sans">
+            {words.slice(0, 36).map((wordState, index) => (
               <span
-                key={index}
-                className={`text-3xl px-2 py-1 rounded transition-all ${
+                key={`${wordState.word.hanzi}-${index}`}
+                className={`text-2xl px-2 py-1 rounded transition-all ${
                   wordState.status === "current"
-                    ? "bg-primary/20 text-primary border-2 border-primary"
+                    ? "bg-primary/30 text-primary border-2 border-primary font-bold"
                     : wordState.status === "correct"
-                    ? "bg-green-500/20 text-green-500"
+                    ? "bg-green-500/30 text-green-600"
                     : wordState.status === "incorrect"
-                    ? "bg-red-500/20 text-red-500"
+                    ? "bg-red-500/30 text-red-600"
                     : "text-foreground"
                 }`}
               >
