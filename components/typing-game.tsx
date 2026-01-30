@@ -123,13 +123,33 @@ export function TypingGame({ level }: TypingGameProps) {
           : prev.correctKeystrokes,
       }))
 
-      setCurrentIndex((prev) => prev + 1)
+      const newIndex = currentIndex + 1
+      const wordsPerRow = 12
+      
+      // When completing the first row (12 words), shift rows up
+      if (newIndex >= wordsPerRow) {
+        setWords((prev) => {
+          // Remove the completed first row
+          const remainingWords = prev.slice(wordsPerRow)
+          // Mark the first word of the new first row as current
+          if (remainingWords.length > 0) {
+            remainingWords[0] = { ...remainingWords[0], status: "current" }
+          }
+          // Generate a new row to add at the end
+          const newRowWords = generateWordSet(level, wordsPerRow).map((word) => ({
+            word,
+            status: "pending" as WordStatus,
+            userInput: "",
+          }))
+          return [...remainingWords, ...newRowWords]
+        })
+        setCurrentIndex(0)
+      } else {
+        setCurrentIndex(newIndex)
+      }
+      
       setInput("")
     }
-  }
-
-  const handleContainerClick = () => {
-    inputRef.current?.focus()
   }
 
   const calculateWPM = () => {
@@ -219,11 +239,10 @@ export function TypingGame({ level }: TypingGameProps) {
 
   return (
     <div 
-      className="min-h-screen bg-background flex flex-col items-center justify-center p-4 cursor-text"
-      onClick={handleContainerClick}
+      className="min-h-screen bg-background flex flex-col items-center justify-center p-4"
       ref={containerRef}
     >
-      <div className="w-full max-w-4xl space-y-8">
+      <div className="w-full max-w-5xl space-y-6">
         {/* Header */}
         <div className="flex items-center justify-center gap-4">
           <Link 
@@ -245,19 +264,19 @@ export function TypingGame({ level }: TypingGameProps) {
           </div>
         </div>
 
-        {/* Words Display */}
-        <div className="relative overflow-hidden" style={{ height: "180px" }}>
-          <div className="flex flex-wrap gap-x-4 gap-y-6 justify-center text-2xl leading-relaxed font-sans">
-            {words.slice(0, 35).map((wordState, index) => (
+        {/* Words Display - 2 rows */}
+        <div className="relative overflow-hidden bg-card/50 rounded-lg p-4 border border-border">
+          <div className="flex flex-wrap gap-x-4 gap-y-3 justify-between text-2xl leading-relaxed font-sans">
+            {words.slice(0, 24).map((wordState, index) => (
               <span
-                key={index}
-                className={`text-3xl transition-colors ${
+                key={`${wordState.word.hanzi}-${index}`}
+                className={`text-2xl px-2 py-1 rounded transition-all ${
                   wordState.status === "current"
-                    ? "text-current"
+                    ? "bg-primary/30 text-primary border-2 border-primary font-bold"
                     : wordState.status === "correct"
-                    ? "text-correct"
+                    ? "bg-green-500/30 text-green-600"
                     : wordState.status === "incorrect"
-                    ? "text-incorrect"
+                    ? "bg-red-500/30 text-red-600"
                     : "text-foreground"
                 }`}
               >
@@ -267,20 +286,23 @@ export function TypingGame({ level }: TypingGameProps) {
           </div>
         </div>
 
-        {/* Hidden Input */}
-        <input
-          ref={inputRef}
-          type="text"
-          value={input}
-          onChange={handleInputChange}
-          onKeyDown={handleKeyDown}
-          className="absolute opacity-0 pointer-events-none"
-          autoFocus
-          autoComplete="off"
-          autoCorrect="off"
-          autoCapitalize="off"
-          spellCheck={false}
-        />
+        {/* Visible Input */}
+        <div className="flex justify-center">
+          <input
+            ref={inputRef}
+            type="text"
+            value={input}
+            onChange={handleInputChange}
+            onKeyDown={handleKeyDown}
+            className="w-full max-w-md px-4 py-3 text-xl text-center bg-card border border-border rounded-lg focus:outline-none focus:border-primary text-foreground"
+            placeholder="Type here..."
+            autoFocus
+            autoComplete="off"
+            autoCorrect="off"
+            autoCapitalize="off"
+            spellCheck={false}
+          />
+        </div>
 
         {/* Instructions */}
         {gameState === "idle" && (
